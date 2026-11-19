@@ -218,8 +218,9 @@ function setupChartPicker(getModels, choose) {
   function show(query) {
     const terms = query.toLowerCase().trim().split(/\s+/);
     matches = getModels().filter(model => {
-      const label = (model.name + " " + labFor(model)[0]).toLowerCase();
-      return terms.every(term => label.includes(term));
+      const name = model.name.toLowerCase();
+      const labWords = labFor(model)[0].toLowerCase().split(/\s+/);
+      return terms.every(term => name.includes(term) || labWords.some(word => word.startsWith(term)));
     }).sort((a, b) => a.name.localeCompare(b.name));
     active = -1;
     input.removeAttribute("aria-activedescendant");
