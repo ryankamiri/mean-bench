@@ -9,3 +9,5 @@ Run `python3 -m http.server --directory site 8000` for a local preview. The stat
 With the local benchmark inputs in `data/`, run `python3 scripts/calculate_mean_bench.py` followed by `python3 scripts/export_leaderboard.py` to refresh the public snapshot. The raw benchmark archive is stored locally.
 
 Vercel serves `site/` directly using `vercel.json`.
+
+Pushes to the GitHub `main` branch trigger a production deployment to [Mean Bench](https://mean-bench.vercel.app/).
