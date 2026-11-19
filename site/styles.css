@@ -68,8 +68,26 @@ h3 { font-size: 1.08rem; line-height: 1.3; }
 .chart-views { display: flex; gap: 4px; padding: 3px; border: 1px solid var(--border); border-radius: 9px; }
 .chart-views button { min-height: 36px; border-color: transparent; color: var(--quiet); }
 .chart-views button[aria-pressed="true"] { background: var(--raised); color: var(--accent); border-color: var(--border); }
-.chart-picker { min-width: 0; }
-.chart-picker select { width: min(100%, 265px); }
+.chart-picker { position: relative; min-width: 0; width: min(100%, 265px); }
+.chart-picker input { width: 100%; }
+.chart-options {
+  position: absolute;
+  z-index: 4;
+  inset-inline: 0;
+  top: calc(100% + 5px);
+  max-height: var(--popup-height, 240px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--panel);
+  box-shadow: 0 12px 28px #0007;
+}
+.chart-options[data-placement="above"] { top: auto; bottom: calc(100% + 5px); }
+.chart-options ul { padding: 3px; list-style: none; }
+.chart-options li { display: flex; align-items: center; gap: 9px; min-height: 44px; padding: 6px 9px; cursor: pointer; border-radius: 5px; }
+.chart-options li:hover, .chart-options li[aria-selected="true"] { background: var(--raised); color: var(--accent); }
+.chart-options p { padding: 8px 12px; color: var(--quiet); }
 .chart-selection { margin-top: 9px; display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 51px; padding: 5px 11px; background: var(--bg); border-radius: 8px; }
 #chart-detail { color: var(--quiet); line-height: 1.35; font-size: .85rem; }
 #chart-detail strong { display: block; color: var(--ink); }
@@ -161,9 +179,9 @@ tbody tr[data-active="true"] { background: var(--raised); }
   .panel-head p { font-size: .85rem; }
   #plot-count { font-size: .68rem; }
   .chart-controls { display: grid; margin-top: 9px; }
-  .chart-picker select { width: 100%; }
+  .chart-picker { width: 100%; }
   .chart-views button { flex: 1; padding-inline: 5px; min-width: 0; }
-  .chart-views button, .chart-picker select, .controls input, .controls select, .pagination button { min-height: 44px; }
+  .chart-views button, .chart-picker input, .controls input, .controls select, .pagination button { min-height: 44px; }
   .chart-selection { min-height: 55px; }
   #scatter { height: 280px; height: clamp(218px, 46svh, 305px); }
   #scatter text { font-size: 11px; }

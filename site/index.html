@@ -58,13 +58,19 @@
           <button type="button" data-chart-view="top" aria-pressed="false">Top 10</button>
           <button type="button" data-chart-view="frontier" aria-pressed="false">Frontier</button>
         </div>
-        <label class="chart-picker">
-          <span class="sr-only">Inspect a model</span>
-          <select id="chart-model"><option value="">Choose a model</option></select>
-        </label>
+        <div class="chart-picker">
+          <label for="chart-model" class="sr-only">Search chart models</label>
+          <input id="chart-model" type="search" role="combobox" aria-autocomplete="list"
+            aria-controls="chart-model-options" aria-expanded="false" placeholder="Search models"
+            autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="search">
+          <div class="chart-options" id="chart-options-popup" hidden>
+            <ul id="chart-model-options" role="listbox" aria-label="Matching models"></ul>
+            <p id="chart-model-empty" role="status" hidden>No matching models in this view.</p>
+          </div>
+        </div>
       </div>
       <div class="chart-selection" id="chart-selection" hidden>
-        <p id="chart-detail" aria-live="polite">Tap a logo or choose a model to see its score, coverage, and cost.</p>
+        <p id="chart-detail" aria-live="polite">Tap a logo or search for a model to see its score, coverage, and cost.</p>
         <a href="#leaderboard" id="chart-row-link" hidden>View rank</a>
       </div>
       <svg id="scatter" role="img" aria-label="Benchmark score by cost per task" aria-describedby="scatter-desc">

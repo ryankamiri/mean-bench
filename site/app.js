@@ -186,12 +186,127 @@ function annotate(layer, candidates, points, { width, top, bottom, max, coverage
   }
 }
 
+function setupChartPicker(getModels, choose) {
+  const input = byId("chart-model");
+  const popup = byId("chart-options-popup");
+  const list = byId("chart-model-options");
+  const empty = byId("chart-model-empty");
+  const picker = input.closest(".chart-picker");
+  let committed = "";
+  let matches = [];
+  let active = -1;
+
+  function positionPopup() {
+    if (popup.hidden) return;
+    const bounds = picker.getBoundingClientRect();
+    const top = window.visualViewport?.offsetTop ?? 0;
+    const height = window.visualViewport?.height ?? window.innerHeight;
+    const below = top + height - bounds.bottom - 12;
+    const above = bounds.top - top - 12;
+    const useAbove = below < 140 && above > below;
+    popup.dataset.placement = useAbove ? "above" : "below";
+    popup.style.setProperty("--popup-height", Math.max(44, Math.min(240, useAbove ? above : below)) + "px");
+  }
+
+  function close() {
+    popup.hidden = true;
+    input.setAttribute("aria-expanded", "false");
+    input.removeAttribute("aria-activedescendant");
+    input.value = committed;
+  }
+
+  function show(query) {
+    const terms = query.toLowerCase().trim().split(/\s+/);
+    matches = getModels().filter(model => {
+      const label = (model.name + " " + labFor(model)[0]).toLowerCase();
+      return terms.every(term => label.includes(term));
+    }).sort((a, b) => a.name.localeCompare(b.name));
+    active = -1;
+    input.removeAttribute("aria-activedescendant");
+    list.replaceChildren();
+    for (const [index, model] of matches.entries()) {
+      const option = document.createElement("li");
+      option.id = "chart-option-" + index;
+      option.dataset.index = index;
+      option.setAttribute("role", "option");
+      option.setAttribute("aria-label", model.name);
+      option.setAttribute("aria-selected", "false");
+      option.append(logo(labFor(model)), model.name);
+      list.append(option);
+    }
+    popup.hidden = false;
+    empty.hidden = matches.length > 0;
+    input.setAttribute("aria-expanded", "true");
+    popup.scrollTop = 0;
+    positionPopup();
+  }
+
+  function select(index) {
+    choose(matches[index]);
+    if (window.matchMedia("(pointer: coarse)").matches) input.blur();
+  }
+
+  function openCurrent() {
+    show(input.value === committed ? "" : input.value);
+  }
+
+  input.addEventListener("focus", () => {
+    input.select();
+    openCurrent();
+  });
+  input.addEventListener("click", () => { if (popup.hidden) openCurrent(); });
+  input.addEventListener("input", () => show(input.value));
+  input.addEventListener("keydown", event => {
+    if (event.isComposing) return;
+    if (event.key === "Escape" && !popup.hidden) {
+      event.preventDefault();
+      close();
+    } else if (event.key === "Enter" && !popup.hidden && matches.length) {
+      event.preventDefault();
+      select(Math.max(0, active));
+    } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      if (popup.hidden) openCurrent();
+      if (!matches.length) return;
+      list.children[active]?.setAttribute("aria-selected", "false");
+      const step = event.key === "ArrowDown" ? 1 : -1;
+      active = active < 0 && step < 0 ? matches.length - 1 : (active + step + matches.length) % matches.length;
+      const option = list.children[active];
+      option.setAttribute("aria-selected", "true");
+      input.setAttribute("aria-activedescendant", option.id);
+      const itemBounds = option.getBoundingClientRect();
+      const popupBounds = popup.getBoundingClientRect();
+      if (itemBounds.top < popupBounds.top) popup.scrollTop += itemBounds.top - popupBounds.top;
+      if (itemBounds.bottom > popupBounds.bottom) popup.scrollTop += itemBounds.bottom - popupBounds.bottom;
+    }
+  });
+  list.addEventListener("mousedown", event => {
+    if (event.target.closest("[data-index]")) event.preventDefault();
+  });
+  list.addEventListener("click", event => {
+    const option = event.target.closest("[data-index]");
+    if (option) select(Number(option.dataset.index));
+  });
+  for (const event of ["pointerdown", "focusin"]) {
+    document.addEventListener(event, ({ target }) => {
+      if (!popup.hidden && !picker.contains(target)) close();
+    });
+  }
+  window.addEventListener("scroll", positionPopup, { passive: true });
+  window.addEventListener("resize", positionPopup);
+  window.visualViewport?.addEventListener("resize", positionPopup);
+  window.visualViewport?.addEventListener("scroll", positionPopup);
+  return model => {
+    committed = model?.name ?? "";
+    close();
+  };
+}
+
 function initialize({ models, benchmarks, benchmarkCount, minimumModelsPerBenchmark, releaseRange }) {
   const chart = byId("scatter");
   const rows = byId("leaderboard-rows");
   const search = byId("model-search");
   const sort = byId("model-sort");
-  const picker = byId("chart-model");
   const rankLink = byId("chart-row-link");
   const detail = byId("chart-detail");
   const viewButtons = [...document.querySelectorAll("[data-chart-view]")];
@@ -246,6 +361,7 @@ function initialize({ models, benchmarks, benchmarkCount, minimumModelsPerBenchm
   let selected = null;
   let visible = models;
   let chartView = "all";
+  const reflectPicker = setupChartPicker(() => chartViews[chartView], choose);
 
   function draw() {
     renderChart(chart, {
@@ -258,9 +374,6 @@ function initialize({ models, benchmarks, benchmarkCount, minimumModelsPerBenchm
 
   function updateChartControls() {
     const plotted = chartViews[chartView];
-    const options = [...plotted].sort((a, b) => a.name.localeCompare(b.name));
-    picker.replaceChildren(new Option("Choose a model", ""));
-    for (const model of options) picker.add(new Option(model.name, model.id));
     byId("plot-count").textContent = plotted.length + " models plotted";
     frontierKey.hidden = chartView === "top";
     for (const button of viewButtons) {
@@ -286,7 +399,7 @@ function initialize({ models, benchmarks, benchmarkCount, minimumModelsPerBenchm
         row.querySelector("button").setAttribute("aria-pressed", active);
       }
     }
-    picker.value = model?.cost != null ? model.id : "";
+    reflectPicker(model?.cost != null ? model : null);
     rankLink.hidden = !model;
     if (model) {
       const name = document.createElement("strong");
@@ -294,7 +407,7 @@ function initialize({ models, benchmarks, benchmarkCount, minimumModelsPerBenchm
       const price = model.cost === null ? "Cost unavailable" : cost(model) + "/task";
       detail.replaceChildren(name, average(model) + " avg. · " + coverage(model) + " · " + price);
     } else {
-      detail.textContent = "Tap a logo or choose a model to see its score, coverage, and cost.";
+      detail.textContent = "Tap a logo or search for a model to see its score, coverage, and cost.";
     }
     draw();
   }
@@ -306,9 +419,6 @@ function initialize({ models, benchmarks, benchmarkCount, minimumModelsPerBenchm
       choose(chartViews[chartView].includes(selected) ? selected : null);
     });
   }
-  picker.addEventListener("change", () => {
-    choose(chartViews[chartView].find(model => model.id === picker.value) ?? null);
-  });
   rankLink.addEventListener("click", event => {
     if (!selected) return;
     event.preventDefault();
