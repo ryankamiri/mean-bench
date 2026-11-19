@@ -3,6 +3,10 @@ import { labFor } from "./labs.js";
 const namespace = "http://www.w3.org/2000/svg";
 const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 3 });
 const byId = id => document.getElementById(id);
+const compact = window.matchMedia("(max-width: 640px)");
+const setStoryLayout = () => { byId("launch-story").open = !compact.matches; };
+setStoryLayout();
+compact.addEventListener?.("change", setStoryLayout);
 
 function svg(tag, attributes, text) {
   const element = document.createElementNS(namespace, tag);
@@ -21,7 +25,16 @@ function logo([lab, asset]) {
   return icon;
 }
 
-function renderChart(chart, models, selected, choose, coverage, describe) {
+function getFrontier(models) {
+  const frontier = [];
+  const byCost = [...models].sort((a, b) => a.cost - b.cost || b.score - a.score);
+  for (const model of byCost) {
+    if (!frontier.length || model.score > frontier.at(-1).score) frontier.push(model);
+  }
+  return frontier;
+}
+
+function renderChart(chart, { models, plotted, frontier, selected, choose, coverage, describe }) {
   const width = chart.clientWidth;
   const height = chart.clientHeight;
   if (!width || !height) return;
@@ -60,18 +73,13 @@ function renderChart(chart, models, selected, choose, coverage, describe) {
   if (hasZero) label("$0", zero, bottom + 17);
   label("Mean cost per task (USD, log scale)", width / 2, height - 5);
 
-  const frontier = [];
-  const byCost = [...models].sort((a, b) => a.cost - b.cost || b.score - a.score);
-  for (const model of byCost) {
-    if (!frontier.length || model.score > frontier.at(-1).score) frontier.push(model);
-  }
   const positiveFrontier = frontier.filter(model => model.cost > 0);
   layer.append(svg("polyline", {
     class: "frontier",
     points: positiveFrontier.map(m => [x(m.cost), y(m.score)].join(",")).join(" "),
   }));
-  const labelOrder = new Set([selected, ...models.slice(0, narrow ? 4 : 8), ...positiveFrontier.toReversed()].filter(Boolean));
-  const points = models.map(model => ({
+  const labelOrder = new Set([selected, ...plotted.slice(0, narrow ? 3 : 8), ...[...positiveFrontier].reverse()].filter(Boolean));
+  const points = plotted.map(model => ({
     model, px: x(model.cost), py: y(model.score), radius: labelOrder.has(model) ? 10 : 7,
   }));
   const lookup = new Map(points.map(point => [point.model, point]));
@@ -85,8 +93,30 @@ function renderChart(chart, models, selected, choose, coverage, describe) {
     drawPoint(active);
   }
   annotate(layer, [...labelOrder].map(model => lookup.get(model)).filter(Boolean), points, {
-    width, top, bottom, max: narrow ? 4 : 11, coverage,
+    width, top, bottom, max: narrow ? 3 : 11, coverage,
   });
+
+  chart.onclick = event => {
+    const hitId = event.target.getAttribute?.("data-model");
+    const hit = hitId && points.find(point => point.model.id === hitId);
+    if (hit && event.pointerType === "mouse") {
+      choose(hit.model);
+      return;
+    }
+    const bounds = chart.getBoundingClientRect();
+    const tapX = (event.clientX - bounds.left) * width / bounds.width;
+    const tapY = (event.clientY - bounds.top) * height / bounds.height;
+    let best = hit;
+    let distance = 24;
+    for (const point of points) {
+      const delta = Math.hypot(tapX - point.px, tapY - point.py);
+      if (delta < distance) {
+        best = point;
+        distance = delta;
+      }
+    }
+    if (best) choose(best.model);
+  };
 
   function drawPoint({ model, px, py, radius }) {
     const [lab, asset] = labFor(model);
@@ -95,7 +125,8 @@ function renderChart(chart, models, selected, choose, coverage, describe) {
       : svg("text", { x: px, y: py, "text-anchor": "middle", "dominant-baseline": "middle" }, "?");
     point.setAttribute("class", "point");
     point.setAttribute("data-model", model.id);
-    point.addEventListener("pointerenter", () => {
+    point.addEventListener("pointerenter", event => {
+      if (event.pointerType !== "mouse") return;
       const name = document.createElement("strong");
       name.textContent = model.name;
       const developer = document.createElement("span");
@@ -112,7 +143,6 @@ function renderChart(chart, models, selected, choose, coverage, describe) {
       tooltip.style.top = Math.max(7, plot.top - frame.top + py - tooltip.offsetHeight - 8) + "px";
     });
     point.addEventListener("pointerleave", () => { tooltip.hidden = true; });
-    point.addEventListener("click", () => choose(model));
     layer.append(point);
   }
 }
@@ -161,8 +191,14 @@ function initialize({ models, benchmarks, benchmarkCount, minimumModelsPerBenchm
   const rows = byId("leaderboard-rows");
   const search = byId("model-search");
   const sort = byId("model-sort");
+  const picker = byId("chart-model");
+  const rankLink = byId("chart-row-link");
+  const detail = byId("chart-detail");
+  const viewButtons = [...document.querySelectorAll("[data-chart-view]")];
   const pageSize = 12;
   const withCost = models.filter(model => model.cost !== null);
+  const frontier = getFrontier(withCost);
+  const chartViews = { all: withCost, top: withCost.slice(0, 10), frontier };
   const coverage = model => model.count + "/" + benchmarkCount;
   const average = model => model.score.toFixed(2);
   const cost = model => model.cost === null ? "—" : usd.format(model.cost);
@@ -178,7 +214,6 @@ function initialize({ models, benchmarks, benchmarkCount, minimumModelsPerBenchm
   byId("scored-count").textContent = models.length;
   for (const label of document.querySelectorAll("[data-benchmark-count]")) label.textContent = benchmarkCount;
   byId("minimum-benchmark-models").textContent = minimumModelsPerBenchmark;
-  byId("plot-count").textContent = withCost.length + " models plotted";
   const legend = byId("legend");
   const occurrences = new Map();
   for (const model of withCost) {
@@ -210,15 +245,38 @@ function initialize({ models, benchmarks, benchmarkCount, minimumModelsPerBenchm
   let page = 0;
   let selected = null;
   let visible = models;
+  let chartView = "all";
+
   function draw() {
-    renderChart(chart, withCost, selected, choose, coverage, describe);
+    renderChart(chart, {
+      models: withCost,
+      plotted: chartViews[chartView],
+      frontier: chartView === "top" ? [] : frontier,
+      selected, choose, coverage, describe,
+    });
   }
 
-  function choose(model, reveal = true) {
-    selected = selected === model ? null : model;
+  function updateChartControls() {
+    const plotted = chartViews[chartView];
+    const options = [...plotted].sort((a, b) => a.name.localeCompare(b.name));
+    picker.replaceChildren(new Option("Choose a model", ""));
+    for (const model of options) picker.add(new Option(model.name, model.id));
+    byId("plot-count").textContent = plotted.length + " models plotted";
+    frontierKey.hidden = chartView === "top";
+    for (const button of viewButtons) {
+      button.setAttribute("aria-pressed", String(button.dataset.chartView === chartView));
+    }
+  }
+
+  function choose(model) {
+    selected = model;
+    if (model?.cost != null && !chartViews[chartView].includes(model)) {
+      chartView = "all";
+      updateChartControls();
+    }
     const index = visible.indexOf(model);
     const targetPage = index === -1 ? page : Math.floor(index / pageSize);
-    if (reveal && targetPage !== page) {
+    if (targetPage !== page) {
       page = targetPage;
       renderRows();
     } else {
@@ -228,11 +286,41 @@ function initialize({ models, benchmarks, benchmarkCount, minimumModelsPerBenchm
         row.querySelector("button").setAttribute("aria-pressed", active);
       }
     }
-    byId("chart-detail").textContent = selected
-      ? selected.name + " · " + describe(selected) + (selected.cost === null ? "" : " (" + selected.costCount + " cost reports)")
-      : "Select a model to see its score, coverage, and cost.";
+    picker.value = model?.cost != null ? model.id : "";
+    rankLink.hidden = !model;
+    if (model) {
+      const name = document.createElement("strong");
+      name.textContent = model.name;
+      const price = model.cost === null ? "Cost unavailable" : cost(model) + "/task";
+      detail.replaceChildren(name, average(model) + " avg. · " + coverage(model) + " · " + price);
+    } else {
+      detail.textContent = "Tap a logo or choose a model to see its score, coverage, and cost.";
+    }
     draw();
   }
+
+  for (const button of viewButtons) {
+    button.addEventListener("click", () => {
+      chartView = button.dataset.chartView;
+      updateChartControls();
+      choose(chartViews[chartView].includes(selected) ? selected : null);
+    });
+  }
+  picker.addEventListener("change", () => {
+    choose(chartViews[chartView].find(model => model.id === picker.value) ?? null);
+  });
+  rankLink.addEventListener("click", event => {
+    if (!selected) return;
+    event.preventDefault();
+    if (!visible.includes(selected)) {
+      search.value = "";
+      updateFilters();
+    }
+    choose(selected);
+    const button = rows.querySelector('tr[data-active="true"] button');
+    button?.focus({ preventScroll: true });
+    button?.scrollIntoView({ block: "center" });
+  });
 
   function updateFilters() {
     const query = search.value.trim().toLowerCase();
@@ -283,7 +371,7 @@ function initialize({ models, benchmarks, benchmarkCount, minimumModelsPerBenchm
       button.type = "button";
       button.className = "model-btn";
       button.setAttribute("aria-pressed", String(model === selected));
-      button.addEventListener("click", () => choose(model, false));
+      button.addEventListener("click", () => choose(selected === model ? null : model));
       const name = document.createElement("span");
       name.textContent = model.name;
       const lab = labFor(model);
@@ -310,7 +398,11 @@ function initialize({ models, benchmarks, benchmarkCount, minimumModelsPerBenchm
   sort.addEventListener("change", updateFilters);
   byId("previous").addEventListener("click", () => { page -= 1; renderRows(); });
   byId("next").addEventListener("click", () => { page += 1; renderRows(); });
+  updateChartControls();
+  byId("chart-controls").hidden = false;
+  byId("chart-selection").hidden = false;
   renderRows();
+  draw();
   new ResizeObserver(draw).observe(chart);
   document.fonts.ready.then(draw);
 }

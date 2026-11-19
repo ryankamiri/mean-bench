@@ -32,8 +32,11 @@
     <section class="hero" aria-labelledby="page-title">
       <div>
         <h1 id="page-title">Mean Bench<span>.</span></h1>
-        <p>Open a coding leaderboard and one model wins. Switch to accounting, then web research, and you’ve got three champions and a small tab problem.</p>
-        <p>So I built Mean Bench to average it out. It uses the results each model has across <span data-benchmark-count>25</span> benchmarks and shows how many went into its score.</p>
+        <details id="launch-story" open>
+          <summary>Why Mean Bench?</summary>
+          <p>Open a coding leaderboard and one model wins. Switch to accounting, then web research, and you’ve got three champions and a small tab problem.</p>
+          <p>So I built Mean Bench to average it out. It uses the results each model has across <span data-benchmark-count>25</span> benchmarks and shows how many went into its score.</p>
+        </details>
       </div>
       <dl class="snapshot">
         <div><dt>Release window</dt><dd id="release-window">Jun 18 – Nov 18, 2026</dd></div>
@@ -43,21 +46,33 @@
     </section>
     <noscript><p class="notice">Enable JavaScript to explore the scores and leaderboard.</p></noscript>
     <p class="notice" id="data-error" role="alert" hidden>Could not load the benchmark snapshot. Reload to try again.</p>
-    <section class="chart-panel" aria-labelledby="chart-heading">
+    <section class="chart-panel" id="chart" aria-labelledby="chart-heading">
       <header class="panel-head">
-        <div>
-          <h2 id="chart-heading">Score vs. cost</h2>
-          <p>Average benchmark score by mean reported cost per task.</p>
-        </div>
+        <h2 id="chart-heading">Score vs. cost</h2>
         <span id="plot-count" class="mono quiet">62 models plotted</span>
+        <p>Average score by reported cost per task.</p>
       </header>
+      <div class="chart-controls" id="chart-controls" hidden>
+        <div class="chart-views" aria-label="Models shown on chart" role="group">
+          <button type="button" data-chart-view="all" aria-pressed="true">All models</button>
+          <button type="button" data-chart-view="top" aria-pressed="false">Top 10</button>
+          <button type="button" data-chart-view="frontier" aria-pressed="false">Frontier</button>
+        </div>
+        <label class="chart-picker">
+          <span class="sr-only">Inspect a model</span>
+          <select id="chart-model"><option value="">Choose a model</option></select>
+        </label>
+      </div>
+      <div class="chart-selection" id="chart-selection" hidden>
+        <p id="chart-detail" aria-live="polite">Tap a logo or choose a model to see its score, coverage, and cost.</p>
+        <a href="#leaderboard" id="chart-row-link" hidden>View rank</a>
+      </div>
       <svg id="scatter" role="img" aria-label="Benchmark score by cost per task" aria-describedby="scatter-desc">
         <g></g>
       </svg>
       <p id="scatter-desc" class="sr-only">A scatterplot with each model marked by its developer’s logo. Positive costs use a log scale. The dashed observed Pareto frontier connects models with the highest observed score at their cost or less, with ties going to the cheaper model. Exact scores and coverage are available in the leaderboard.</p>
       <div class="chart-footer">
         <ul id="legend" class="legend" aria-label="Chart legend"></ul>
-        <p id="chart-detail" class="chart-detail quiet" aria-live="polite">Select a model to see its score, coverage, and cost.</p>
       </div>
       <div id="point-tooltip" class="point-tooltip" hidden></div>
     </section>
