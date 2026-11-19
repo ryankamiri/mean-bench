@@ -1,0 +1,43 @@
+Lab logos are used to identify model developers. Logos belong to their respective owners.
+Lobe Icons package: https://www.npmjs.com/package/@lobehub/icons-static-svg/v/1.104.0
+Monochrome SVG colors are set for the dark background.
+
+Sources:
+openai.svg: openai.svg in Lobe Icons 1.104.0
+claude.svg: claude-color.svg in Lobe Icons 1.104.0
+google.svg: google-color.svg in Lobe Icons 1.104.0
+meta.svg: meta-color.svg in Lobe Icons 1.104.0
+deepseek.svg: deepseek-color.svg in Lobe Icons 1.104.0
+alibaba.svg: alibaba-color.svg in Lobe Icons 1.104.0
+ant-group.svg: antgroup-color.svg in Lobe Icons 1.104.0
+nvidia.svg: nvidia-color.svg in Lobe Icons 1.104.0
+xai.svg: xai.svg in Lobe Icons 1.104.0
+tencent.svg: tencent-color.svg in Lobe Icons 1.104.0
+moonshot.svg: moonshot.svg in Lobe Icons 1.104.0
+zhipu.svg: zhipu-color.svg in Lobe Icons 1.104.0
+xiaomi.svg: https://cdn.simpleicons.org/xiaomi/FF7900
+minimax.svg: minimax-color.svg in Lobe Icons 1.104.0
+mistral.svg: mistral-color.svg in Lobe Icons 1.104.0
+fireworks.svg: fireworks-color.svg in Lobe Icons 1.104.0
+inception.svg: inception.svg in Lobe Icons 1.104.0
+agnes-ai.svg: agnesai.svg in Lobe Icons 1.104.0
+stepfun.svg: stepfun-color.svg in Lobe Icons 1.104.0
+upstage.svg: upstage-color.svg in Lobe Icons 1.104.0
+reflection.svg: reflection-color.svg in Lobe Icons 1.104.0
+liquid-ai.svg: liquid.svg in Lobe Icons 1.104.0
+meituan.svg: longcat-color.svg in Lobe Icons 1.104.0
+ibm.svg: ibm.svg in Lobe Icons 1.104.0
+thinking-machines.png: https://thinkingmachines.ai/images/favicon-32x32.png
+cognition.svg: https://cognition.ai/icon.svg?icon.1s218o1m64t65.svg
+apodex.webp: https://www.apodex.ai/favicon-dark.webp
+ifm.svg: https://artificialanalysis.ai/img/logos/ifm.svg
+ai9stars.svg: https://artificialanalysis.ai/img/logos/ai9stars.svg
+motif.svg: https://artificialanalysis.ai/img/logos/motif.svg
+nanbeige.png: https://artificialanalysis.ai/img/logos/nanbeige.png
+openbmb.svg: https://artificialanalysis.ai/img/logos/openbmb.svg
+sk-telecom.svg: https://artificialanalysis.ai/img/logos/sktelecom.svg
+lg-ai.png: https://artificialanalysis.ai/img/logos/lg.png
+celeris.png: https://celeris.ai/favicon-48.png
+multiverse.png: https://multiversecomputing.com/icon.png?icon.1-uj121zws2tw.png
+joy-future-academy.svg: https://artificialanalysis.ai/img/logos/joy-ai.svg
+china-mobile.png: https://artificialanalysis.ai/img/logos/china-mobile.png

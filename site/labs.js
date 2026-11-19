@@ -1,0 +1,72 @@
+const labs = {
+  openai: ["OpenAI", "openai.svg"],
+  anthropic: ["Anthropic", "claude.svg"],
+  google: ["Google", "google.svg"],
+  meta: ["Meta", "meta.svg"],
+  deepseek: ["DeepSeek", "deepseek.svg"],
+  alibaba: ["Alibaba", "alibaba.svg"],
+  "ant-group": ["Ant Group", "ant-group.svg"],
+  nvidia: ["NVIDIA", "nvidia.svg"],
+  xai: ["xAI", "xai.svg"],
+  "thinking-machines": ["Thinking Machines Lab", "thinking-machines.png"],
+  tencent: ["Tencent", "tencent.svg"],
+  cognition: ["Cognition", "cognition.svg"],
+  moonshot: ["Moonshot AI", "moonshot.svg"],
+  zhipu: ["Zhipu AI", "zhipu.svg"],
+  xiaomi: ["Xiaomi MiMo", "xiaomi.svg"],
+  minimax: ["MiniMax", "minimax.svg"],
+  mistral: ["Mistral AI", "mistral.svg"],
+  fireworks: ["Fireworks AI", "fireworks.svg"],
+  inception: ["Inception Labs", "inception.svg"],
+  "agnes-ai": ["Agnes AI", "agnes-ai.svg"],
+  stepfun: ["StepFun", "stepfun.svg"],
+  upstage: ["Upstage", "upstage.svg"],
+  reflection: ["Reflection AI", "reflection.svg"],
+  "liquid-ai": ["Liquid AI", "liquid-ai.svg"],
+  meituan: ["Meituan", "meituan.svg"],
+  ibm: ["IBM", "ibm.svg"],
+  apodex: ["Apodex", "apodex.webp"],
+  ifm: ["Institute of Foundation Models", "ifm.svg"],
+  ai9stars: ["AI9Stars", "ai9stars.svg"],
+  motif: ["Motif Technologies", "motif.svg"],
+  nanbeige: ["Nanbeige", "nanbeige.png"],
+  openbmb: ["OpenBMB", "openbmb.svg"],
+  "sk-telecom": ["SK Telecom", "sk-telecom.svg"],
+  "lg-ai": ["LG AI Research", "lg-ai.png"],
+  celeris: ["Celeris", "celeris.png"],
+  multiverse: ["Multiverse Computing", "multiverse.png"],
+  "joy-future-academy": ["Joy Future Academy", "joy-future-academy.svg"],
+  "china-mobile": ["China Mobile", "china-mobile.png"],
+};
+
+// Public model families whose developer is recorded as "other" in the score snapshot.
+const families = [
+  ["aa-nemotron-", "nvidia"],
+  ["aa-agnes-", "agnes-ai"],
+  ["aa-jt-4-", "china-mobile"],
+  ["aa-motif-", "motif"],
+  ["aa-g9v3-", "ai9stars"],
+  ["aa-step-", "stepfun"],
+  ["aa-solar-", "upstage"],
+  ["aa-joyai-", "joy-future-academy"],
+  ["aa-apodex-", "apodex"],
+  ["aa-k2-horizon-", "ifm"],
+  ["aa-reflection-", "reflection"],
+  ["aa-quasar-", "multiverse"],
+  ["aa-nanbeige", "nanbeige"],
+  ["aa-lfm", "liquid-ai"],
+  ["aa-ling-", "ant-group"],
+  ["aa-longcat-", "meituan"],
+  ["aa-a-x-", "sk-telecom"],
+  ["aa-k-exaone-", "lg-ai"],
+  ["aa-granite-", "ibm"],
+  ["aa-minicpm", "openbmb"],
+  ["aa-celeris-", "celeris"],
+];
+
+export function labFor(model) {
+  const id = model.developer === "other"
+    ? families.find(([prefix]) => model.id.startsWith(prefix))?.[1]
+    : model.developer;
+  return labs[id] ?? [model.developer === "other" ? "Developer unverified" : model.developer, null];
+}

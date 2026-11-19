@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Compare recent AI models by their mean score, benchmark coverage, and reported cost per task.">
+  <meta name="author" content="Ryan Amiri">
+  <meta name="theme-color" content="#0b1420">
+  <meta property="og:title" content="Mean Bench | AI model leaderboard">
+  <meta property="og:description" content="Five months of model releases, with scores averaged across the benchmark results available for each model.">
+  <meta property="og:type" content="website">
+  <title>Mean Bench | AI model leaderboard</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" type="module"></script>
+</head>
+<body>
+  <a class="skip" href="#leaderboard">Skip to leaderboard</a>
+  <header class="masthead">
+    <div class="shell masthead-inner">
+      <a class="wordmark" href="#top"><span class="brand-symbol" aria-hidden="true"><i></i><i></i><i></i></span>Mean Bench</a>
+      <nav aria-label="Main">
+        <a href="#leaderboard">Leaderboard</a>
+        <a href="#methodology">Methodology</a>
+      </nav>
+    </div>
+  </header>
+  <main id="top" class="shell">
+    <section class="hero" aria-labelledby="page-title">
+      <div>
+        <h1 id="page-title">Mean Bench<span>.</span></h1>
+        <p>Compare recent AI models across <span data-benchmark-count>25</span> benchmarks. Each model’s score is the average of its available results.</p>
+      </div>
+      <dl class="snapshot">
+        <div><dt>Release window</dt><dd id="release-window">Jun 18 – Nov 18, 2026</dd></div>
+        <div><dt>Models with scores</dt><dd id="scored-count">78</dd></div>
+        <div><dt>Benchmark suite</dt><dd data-benchmark-count>25</dd></div>
+      </dl>
+    </section>
+    <noscript><p class="notice">Enable JavaScript to explore the scores and leaderboard.</p></noscript>
+    <p class="notice" id="data-error" role="alert" hidden>Could not load the benchmark snapshot. Reload to try again.</p>
+    <section class="chart-panel" aria-labelledby="chart-heading">
+      <header class="panel-head">
+        <div>
+          <h2 id="chart-heading">Score vs. cost</h2>
+          <p>Average benchmark score by mean reported cost per task.</p>
+        </div>
+        <span id="plot-count" class="mono quiet">62 models plotted</span>
+      </header>
+      <svg id="scatter" role="img" aria-label="Benchmark score by cost per task" aria-describedby="scatter-desc">
+        <g></g>
+      </svg>
+      <p id="scatter-desc" class="sr-only">A scatterplot with each model marked by its developer’s logo. Positive costs use a log scale. A dashed frontier connects models with the highest observed scores for their cost. Exact scores and coverage are available in the leaderboard.</p>
+      <div class="chart-footer">
+        <ul id="legend" class="legend" aria-label="Chart legend"></ul>
+        <p id="chart-detail" class="chart-detail quiet" aria-live="polite">Select a model to see its score, coverage, and cost.</p>
+      </div>
+      <div id="point-tooltip" class="point-tooltip" hidden></div>
+    </section>
+    <section class="section leaderboard" id="leaderboard" aria-labelledby="leaderboard-heading">
+      <header class="section-head">
+        <div>
+          <h2 id="leaderboard-heading">Leaderboard</h2>
+          <p>Coverage shows how many of the <span data-benchmark-count>25</span> benchmarks contributed to each score.</p>
+        </div>
+        <div class="controls">
+          <label>Find a model<input id="model-search" type="search" placeholder="Model or developer" autocomplete="off"></label>
+          <label>Sort by<select id="model-sort">
+            <option value="score">Average score</option>
+            <option value="coverage">Coverage</option>
+            <option value="cost">Lowest cost</option>
+          </select></label>
+        </div>
+      </header>
+      <div class="table-shell">
+        <table aria-labelledby="leaderboard-heading">
+          <thead><tr>
+            <th scope="col" class="rank">Rank</th>
+            <th scope="col">Model</th>
+            <th scope="col" class="numeric" id="score-column" aria-sort="descending">Avg. score</th>
+            <th scope="col" class="numeric" id="coverage-column">Coverage</th>
+            <th scope="col" class="numeric" id="cost-column">Cost / task</th>
+          </tr></thead>
+          <tbody id="leaderboard-rows"></tbody>
+        </table>
+        <p class="empty quiet" id="empty-models" hidden>No models match your search.</p>
+        <div class="pagination">
+          <p id="model-range" class="mono quiet" aria-live="polite"></p>
+          <div><button id="previous" type="button">Previous</button><button id="next" type="button">Next</button></div>
+        </div>
+      </div>
+    </section>
+    <section class="section methodology" id="methodology" aria-labelledby="methodology-heading">
+      <header class="section-head">
+        <div>
+          <h2 id="methodology-heading">Methodology</h2>
+          <p>How scores, coverage, and cost are calculated for this snapshot.</p>
+          <p class="methodology-byline">Authored by <a href="https://x.com/RyanAmiri__" rel="me">Ryan Amiri</a></p>
+        </div>
+      </header>
+      <div class="methods-grid">
+        <article><h3>Model and benchmark eligibility</h3><p>The snapshot covers June 18 through November 18, 2026, inclusive. Selected models are excluded from the public ranking. A benchmark needs scores for at least <span id="minimum-benchmark-models">5</span> displayed models. Ranked models have at least one result on the resulting suite.</p></article>
+        <article><h3>Average score and coverage</h3><p>Each benchmark contributes one equally weighted score on a 0–100 scale. The mean divides the sum by the number of scored benchmarks. Coverage shows that count as <strong>n/<span data-benchmark-count>25</span></strong>. Missing results are omitted from the mean.</p></article>
+        <article><h3>Score selection and scale</h3><p>Selection prefers the configured board and source, then the highest reported reasoning effort. Tied results use the observation nearest the median. Percentage scores keep their published values. GDPval and Arena ratings use expected scores against fixed reference ratings. AA-Briefcase uses Artificial Analysis’s normalization, and AA-Omniscience is linearly rescaled.</p></article>
+        <article><h3>Cost and comparability</h3><p>Cost averages the published USD per task or trial among a model’s selected scores with cost data. The plot includes models that report cost. Models can have different benchmark mixes, harnesses, effort levels, and cost coverage, so the frontier describes these observed results.</p></article>
+      </div>
+      <section class="benchmark-sources" aria-labelledby="benchmark-heading">
+        <h3 id="benchmark-heading">All <span data-benchmark-count>25</span> benchmarks and sources</h3>
+        <p class="quiet">Counts show how many leaderboard models have a score for each benchmark.</p>
+        <ul id="benchmark-list"></ul>
+      </section>
+    </section>
+  </main>
+  <footer class="shell site-footer">
+    <span>Mean Bench</span>
+    <span>Authored by <a href="https://x.com/RyanAmiri__" rel="me">Ryan Amiri</a> <span class="quiet">·</span> <a href="https://x.com/RyanAmiri__" rel="me">@RyanAmiri__</a></span>
+  </footer>
+</body>
+</html>
