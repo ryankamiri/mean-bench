@@ -32,7 +32,8 @@
     <section class="hero" aria-labelledby="page-title">
       <div>
         <h1 id="page-title">Mean Bench<span>.</span></h1>
-        <p>Compare recent AI models across <span data-benchmark-count>25</span> benchmarks. Each model’s score is the average of its available results.</p>
+        <p>Open a coding leaderboard and one model wins. Switch to accounting, then web research, and you’ve got three champions and a small tab problem.</p>
+        <p>So I built Mean Bench to average it out. It uses the results each model has across <span data-benchmark-count>25</span> benchmarks and shows how many went into its score.</p>
       </div>
       <dl class="snapshot">
         <div><dt>Release window</dt><dd id="release-window">Jun 18 – Nov 18, 2026</dd></div>
@@ -53,7 +54,7 @@
       <svg id="scatter" role="img" aria-label="Benchmark score by cost per task" aria-describedby="scatter-desc">
         <g></g>
       </svg>
-      <p id="scatter-desc" class="sr-only">A scatterplot with each model marked by its developer’s logo. Positive costs use a log scale. A dashed frontier connects models with the highest observed scores for their cost. Exact scores and coverage are available in the leaderboard.</p>
+      <p id="scatter-desc" class="sr-only">A scatterplot with each model marked by its developer’s logo. Positive costs use a log scale. The dashed observed Pareto frontier connects models with the highest observed score at their cost or less, with ties going to the cheaper model. Exact scores and coverage are available in the leaderboard.</p>
       <div class="chart-footer">
         <ul id="legend" class="legend" aria-label="Chart legend"></ul>
         <p id="chart-detail" class="chart-detail quiet" aria-live="polite">Select a model to see its score, coverage, and cost.</p>
@@ -105,7 +106,7 @@
         <article><h3>Model and benchmark eligibility</h3><p>The snapshot covers June 18 through November 18, 2026, inclusive. Selected models are excluded from the public ranking. A benchmark needs scores for at least <span id="minimum-benchmark-models">5</span> displayed models. Ranked models have at least one result on the resulting suite.</p></article>
         <article><h3>Average score and coverage</h3><p>Each benchmark contributes one equally weighted score on a 0–100 scale. The mean divides the sum by the number of scored benchmarks. Coverage shows that count as <strong>n/<span data-benchmark-count>25</span></strong>. Missing results are omitted from the mean.</p></article>
         <article><h3>Score selection and scale</h3><p>Selection prefers the configured board and source, then the highest reported reasoning effort. Tied results use the observation nearest the median. Percentage scores keep their published values. GDPval and Arena ratings use expected scores against fixed reference ratings. AA-Briefcase uses Artificial Analysis’s normalization, and AA-Omniscience is linearly rescaled.</p></article>
-        <article><h3>Cost and comparability</h3><p>Cost averages the published USD per task or trial among a model’s selected scores with cost data. The plot includes models that report cost. Models can have different benchmark mixes, harnesses, effort levels, and cost coverage, so the frontier describes these observed results.</p></article>
+        <article><h3>Cost and comparability</h3><p>Cost averages the published USD per task or trial among a model’s selected scores with cost data. The observed Pareto frontier connects models with the highest score at their cost or less, with ties going to the cheaper model. Models can have different benchmark mixes, harnesses, effort levels, and cost coverage.</p></article>
       </div>
       <section class="benchmark-sources" aria-labelledby="benchmark-heading">
         <h3 id="benchmark-heading">All <span data-benchmark-count>25</span> benchmarks and sources</h3>

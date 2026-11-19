@@ -193,7 +193,7 @@ function initialize({ models, benchmarks, benchmarkCount, minimumModelsPerBenchm
   }
   const frontierKey = document.createElement("li");
   frontierKey.className = "frontier-key";
-  frontierKey.textContent = "Observed frontier";
+  frontierKey.textContent = "Observed Pareto frontier";
   legend.append(frontierKey);
   for (const benchmark of benchmarks) {
     const item = document.createElement("li");
